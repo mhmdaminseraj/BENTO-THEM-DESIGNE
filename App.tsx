@@ -3,62 +3,76 @@ import React, { useState, useMemo } from 'react';
 import { getThemeRecommendations } from './services/geminiService';
 import { ThemeCategory, AIRecommendation } from './types';
 
-// داده‌های نمونه فارسی شده با برچسب‌های اضافه شده
-const CATEGORIES: ThemeCategory[] = [
+interface ExtendedCategory extends ThemeCategory {
+  price?: string;
+  rating?: string;
+  count?: string;
+  badge?: string;
+}
+
+const CATEGORIES: ExtendedCategory[] = [
   {
     id: 'ecommerce',
-    title: 'قالب‌های فروشگاهی',
-    description: 'طراحی‌های با نرخ تبدیل بالا برای فروشگاه‌های مدرن.',
-    icon: 'shopping_cart',
+    title: 'فروشگاه هوشمند',
+    description: 'نسل جدید قالب‌های ووکامرس با تمرکز بر تجربه کاربری موبایل و فروش انفجاری.',
+    icon: 'shopping_bag',
     color: 'primary',
-    tags: ['ووکامرس', 'شاپیفای', 'فروشگاهی'],
+    tags: ['ووکامرس', 'React', 'PWA'],
     size: 'wide',
-    link: '#'
-  },
-  {
-    id: 'blog',
-    title: 'وبلاگ و مجله',
-    description: 'چیدمان‌های تحریریه برای تولیدکنندگان محتوا.',
-    icon: 'article',
-    color: 'purple-600',
-    tags: ['وردپرس', 'خبری', 'شخصی'],
-    size: 'small',
-    link: '#'
-  },
-  {
-    id: 'portfolio',
-    title: 'نمونه‌کار',
-    description: 'کارهای خود را با استایل خاص به نمایش بگذارید.',
-    icon: 'gallery_thumbnail',
-    color: 'pink-600',
-    tags: ['مینیمال', 'هنری', 'رزومه'],
-    size: 'small',
-    link: '#'
+    link: '#',
+    price: 'از ۲.۴ م',
+    rating: '۴.۹',
+    count: '+۱۲۰ قالب',
+    badge: 'پیشنهاد ۲۰۲۵'
   },
   {
     id: 'corporate',
-    title: 'شرکتی',
-    description: 'قالب‌های بیزینسی حرفه‌ای.',
-    icon: 'business_center',
-    color: 'emerald-600',
-    tags: ['المانتور', 'بیزینس', 'رسمی'],
+    title: 'کسب‌و‌کار مدرن',
+    description: 'طراحی مینیمال برای برندهای پیشرو.',
+    icon: 'account_balance',
+    color: 'emerald-500',
+    tags: ['المانتور', 'شرکتی'],
     size: 'small',
-    link: '#'
+    link: '#',
+    count: '+۸۵ قالب'
+  },
+  {
+    id: 'portfolio',
+    title: 'استودیو خلاق',
+    description: 'نمایش نمونه‌کار با انیمیشن‌های سینمایی.',
+    icon: 'auto_awesome_motion',
+    color: 'accent-purple',
+    tags: ['فری‌لنسری', 'هنری'],
+    size: 'small',
+    link: '#',
+    count: '+۴۰ قالب',
+    badge: 'جدید'
+  },
+  {
+    id: 'blog',
+    title: 'مجله دیجیتال',
+    description: 'بهینه‌ترین ساختار برای سئو و خوانایی.',
+    icon: 'menu_book',
+    color: 'orange-500',
+    tags: ['خبری', 'بلاگ'],
+    size: 'small',
+    link: '#',
+    count: '+۶۰ قالب'
   },
   {
     id: 'landing',
-    title: 'صفحات فرود',
-    description: 'تک‌صفحه‌ای‌های تاثیرگذار.',
-    icon: 'rocket_launch',
-    color: 'orange-600',
-    tags: ['بازاریابی', 'مدرن', 'تبلیغاتی'],
+    title: 'لندینگ پیج',
+    description: 'ساخته شده برای بالاترین نرخ تبدیل.',
+    icon: 'ads_click',
+    color: 'rose-500',
+    tags: ['تبلیغاتی', 'استارتاپ'],
     size: 'small',
-    link: '#'
+    link: '#',
+    count: '+۹۵ قالب'
   }
 ];
 
-// لیست تگ‌های فیلتر سریع
-const QUICK_FILTERS = ['همه', 'ووکامرس', 'شاپیفای', 'وردپرس', 'المانتور', 'مینیمال', 'مدرن'];
+const QUICK_FILTERS = ['همه', 'ووکامرس', 'المانتور', 'React', 'جدید', 'مدرن'];
 
 const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -69,95 +83,87 @@ const App: React.FC = () => {
   const handleAISearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
-
     setIsLoading(true);
     try {
       const result = await getThemeRecommendations(searchQuery);
       setRecommendation(result);
       setSelectedTag('همه');
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
+    } catch (err) { console.error(err); } finally { setIsLoading(false); }
   };
 
   const filteredCategories = useMemo(() => {
     if (selectedTag === 'همه') return CATEGORIES;
     return CATEGORIES.filter(cat => 
-      cat.tags?.some(tag => tag.includes(selectedTag) || selectedTag.includes(tag))
+      cat.tags?.some(tag => tag.includes(selectedTag)) || cat.badge?.includes(selectedTag)
     );
   }, [selectedTag]);
 
-  // Helper to calculate animation index
   let cardIndex = 0;
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* هدر سایت */}
-      <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#232948] px-4 md:px-10 py-3 bg-[#111422] z-50 sticky top-0">
-        <div className="flex items-center gap-8">
-          <div className="flex items-center gap-4 text-white">
-            <div className="size-8 flex items-center justify-center rounded-lg bg-primary/20 text-primary">
-              <span className="material-symbols-outlined">layers</span>
-            </div>
-            <h2 className="text-white text-lg font-bold leading-tight tracking-tight">تم‌مارکت</h2>
-          </div>
-          <nav className="hidden md:flex items-center gap-9">
-            <a className="text-white text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">پوسته‌ها</a>
-            <a className="text-white text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">قالب‌ها</a>
-            <a className="text-white text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">قیمت‌گذاری</a>
-            <a className="text-white text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">پشتیبانی</a>
-          </nav>
-        </div>
-        <div className="flex flex-1 justify-end gap-4 md:gap-8">
-          <form onSubmit={handleAISearch} className="hidden md:flex flex-col min-w-40 !h-10 max-w-64 group">
-            <div className="flex w-full flex-1 items-stretch rounded-lg h-full overflow-hidden bg-[#232948]">
-              <div className="text-[#929bc9] flex items-center justify-center pr-4 group-focus-within:text-white transition-colors">
-                <span className="material-symbols-outlined text-[20px]">
-                  {isLoading ? 'settings_suggest' : 'search'}
-                </span>
+    <div className="flex flex-col min-h-screen pb-20">
+      {/* Header - Glass Style */}
+      <header className="sticky top-0 z-[100] w-full border-b border-white/5 bg-background-dark/80 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-6">
+          <div className="flex items-center gap-10">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/20 text-primary shadow-lg shadow-primary/10">
+                <span className="material-symbols-outlined font-bold">rocket_launch</span>
               </div>
+              <h1 className="text-xl font-black tracking-tight text-white">THEME<span className="text-primary">MARKET</span></h1>
+            </div>
+            <nav className="hidden lg:flex items-center gap-8">
+              {['محصولات', 'اکوسیستم', 'پلن‌های ویژه', 'آکادمی'].map(item => (
+                <a key={item} href="#" className="text-sm font-semibold text-slate-400 hover:text-white transition-colors">{item}</a>
+              ))}
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <form onSubmit={handleAISearch} className="relative hidden md:block">
               <input 
-                className="form-input flex w-full min-w-0 flex-1 border-none bg-transparent focus:ring-0 text-white placeholder:text-[#929bc9] px-4 pr-2 text-sm font-normal text-right" 
-                placeholder="قالب رویایی خود را توصیف کنید..."
+                className="h-10 w-64 rounded-xl border border-white/10 bg-white/5 px-10 text-sm focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all placeholder:text-slate-500" 
+                placeholder="جستجوی هوشمند..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-            </div>
-          </form>
-          <button className="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-6 bg-primary text-white text-sm font-bold leading-normal hover:bg-blue-600 transition-colors">
-            <span className="truncate">ورود</span>
-          </button>
+              <span className="material-symbols-outlined absolute right-3 top-2.5 text-slate-500 text-sm">
+                {isLoading ? 'autorenew' : 'search'}
+              </span>
+            </form>
+            <button className="h-10 rounded-xl bg-white px-6 text-sm font-bold text-black hover:bg-slate-200 transition-colors">ورود</button>
+          </div>
         </div>
       </header>
 
-      <main className="layout-container flex grow flex-col w-full max-w-[1280px] mx-auto px-4 md:px-10 pb-12">
-        <div className="flex flex-col py-10">
-          <div className="flex flex-wrap justify-between items-end gap-6 mb-8">
-            <div className="flex min-w-72 flex-col gap-3">
-              <h1 className="text-white text-4xl md:text-5xl font-black leading-tight tracking-tight">
-                اکوسیستم‌های <span className="text-primary">طراحی برگزیده</span>
-              </h1>
-              <p className="text-text-secondary text-lg font-normal leading-normal max-w-2xl">
-                قالب‌های حرفه‌ای ساخته شده برای عملکرد، مقیاس‌پذیری و فروش بالا.
-              </p>
+      <main className="mx-auto mt-12 w-full max-w-[1400px] px-6">
+        {/* Hero Section */}
+        <div className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div className="max-w-3xl">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full glass-tag px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-primary">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
+              </span>
+              ترندهای ۲۰۲۵ هم‌اکنون در دسترس است
             </div>
+            <h2 className="text-4xl font-extrabold leading-tight text-white md:text-6xl lg:text-7xl">
+              خالق دنیای <span className="bg-gradient-to-l from-primary to-accent-purple bg-clip-text text-transparent">دیجیتال</span> خود باشید
+            </h2>
+            <p className="mt-6 text-lg text-slate-400 leading-relaxed max-w-xl">
+              مجموعه‌ای دست‌چین شده از قالب‌های وردپرس با استانداردهای سال ۲۰۲۵. سرعت خیره‌کننده، کدنویسی تمیز و طراحی آوانگارد.
+            </p>
           </div>
-
-          <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
-            <span className="text-text-secondary text-sm font-medium ml-2 whitespace-nowrap">فیلتر سریع:</span>
+          
+          <div className="flex flex-wrap gap-2">
             {QUICK_FILTERS.map(tag => (
               <button
                 key={tag}
-                onClick={() => {
-                  setSelectedTag(tag);
-                  setRecommendation(null);
-                }}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border whitespace-nowrap ${
+                onClick={() => setSelectedTag(tag)}
+                className={`rounded-full px-5 py-2 text-xs font-bold transition-all border ${
                   selectedTag === tag 
-                  ? 'bg-primary border-primary text-white shadow-lg shadow-blue-900/20' 
-                  : 'bg-[#232948] border-[#343b5c] text-text-secondary hover:text-white hover:border-[#4a5482]'
+                  ? 'bg-primary border-primary text-white' 
+                  : 'glass-tag text-slate-400 hover:text-white hover:border-white/20'
                 }`}
               >
                 {tag}
@@ -166,179 +172,203 @@ const App: React.FC = () => {
           </div>
         </div>
 
+        {/* AI Result Box */}
         {recommendation && (
-          <div className="mb-10 p-6 rounded-2xl bg-primary/10 border border-primary/20 animate-fade-in text-right">
-            <div className="flex items-start gap-4">
-              <div className="size-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                <span className="material-symbols-outlined text-white">auto_awesome</span>
+          <div className="mb-12 rounded-3xl border border-primary/20 bg-primary/5 p-8 backdrop-blur-md animate-fade-in-up">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white">
+                <span className="material-symbols-outlined">psychology</span>
               </div>
-              <div className="flex-1">
-                <div className="flex justify-between items-start">
-                  <h4 className="text-white font-bold mb-1">پیشنهاد هوش مصنوعی برای: "{searchQuery}"</h4>
-                  <button onClick={() => { setRecommendation(null); setSearchQuery(''); }} className="text-xs text-text-secondary hover:text-white">بستن</button>
-                </div>
-                <p className="text-text-secondary text-sm leading-relaxed mb-4">{recommendation.reasoning}</p>
-                <div className="flex gap-2 flex-wrap">
-                  {recommendation.suggestedCategories.map(cat => (
-                    <span key={cat} className="px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-bold uppercase tracking-wider">
-                      {cat}
-                    </span>
-                  ))}
-                </div>
+              <div>
+                <h4 className="font-bold text-white">پاسخ هوش مصنوعی</h4>
+                <p className="text-xs text-primary/80">بر اساس نیاز شما تحلیل شد</p>
               </div>
             </div>
+            <p className="text-slate-300 leading-relaxed">{recommendation.reasoning}</p>
           </div>
         )}
 
-        {/* شبکه بنتو با انیمیشن‌های متوالی */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full auto-rows-min min-h-[400px]">
+        {/* The Bento Grid 2025 */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2">
           
-          {(selectedTag === 'همه' || selectedTag === 'فروشگاهی') && (
+          {/* Main Hero Bento Card */}
+          {(selectedTag === 'همه' || selectedTag === 'مدرن') && (
             <div 
-              key={`featured-${selectedTag}`}
-              className="bento-card animate-fade-in-up col-span-1 md:col-span-2 row-span-2 relative rounded-2xl overflow-hidden bg-card-dark group min-h-[360px] md:min-h-full"
+              className="bento-card group col-span-1 md:col-span-2 row-span-2 rounded-[2.5rem] p-10 flex flex-col justify-between animate-fade-in-up"
               style={{ animationDelay: `${(cardIndex++) * 0.1}s` }}
             >
-              <div className="absolute inset-0 z-0">
-                <div 
-                  className="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105" 
-                  style={{ backgroundImage: `url('https://lh3.googleusercontent.com/aida-public/AB6AXuASroPn0ZdKDwTef37aRJBvPj9g8yPudMTjrW4OQuBxnOIgaO5nwO5KHOvQkleLJQKU8rIFrAYr92ec27KZBausam6MsrvCAcTipx2P919cP6h0kvmHy3PMNhcYayRqGXjyUfzmjj_DFO81erfh3GIfrmH8sRzHVjlLBJjT10f9C07ajK51CO4DkdGVfhsNFfIiIRFbFS_Exx0zBJwRUxq9PsX6_OqWRA9npLJ5ZFVIAEuIPzWLRv7wUt7h_6zWt5Vs1U56yuFxl8Y')` }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#111422] via-[#111422]/80 to-transparent"></div>
-                <div className="absolute inset-0 bg-gradient-to-l from-[#111422]/90 to-transparent"></div>
+              <div className="absolute top-0 left-0 w-full h-full opacity-20 pointer-events-none overflow-hidden rounded-[2.5rem]">
+                <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary rounded-full blur-[120px]"></div>
+                <div className="absolute bottom-0 -left-24 w-64 h-64 bg-accent-purple rounded-full blur-[100px]"></div>
               </div>
-              <div className="relative z-10 flex flex-col justify-end h-full p-6 md:p-8 text-right">
-                <div className="mb-auto">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-primary/20 px-3 py-1 text-xs font-medium text-primary border border-primary/20 mb-4 backdrop-blur-sm">
-                    <span className="material-symbols-outlined text-[14px]">star</span>
-                    محبوب‌ترین
-                  </span>
+
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-black">
+                    <span className="material-symbols-outlined text-3xl font-bold">diamond</span>
+                  </div>
+                  <div className="glass-tag px-4 py-2 rounded-full text-[11px] font-black text-white uppercase tracking-tighter">
+                    Premium Collection
+                  </div>
                 </div>
-                <h3 className="text-3xl font-bold text-white mb-2">اشتراک دسترسی کامل</h3>
-                <p className="text-gray-300 text-base mb-6 max-w-md leading-relaxed">
-                  به کل کاتالوگ ۵۰۰+ تم و قالب ما دسترسی پیدا کنید. شامل پشتیبانی اولویت‌دار.
+                <h3 className="text-4xl md:text-5xl font-black text-white leading-[1.1] mb-6">
+                  دسترسی بی‌پایان به<br/>
+                  <span className="text-primary">تمام قالب‌ها</span>
+                </h3>
+                <p className="text-slate-400 text-lg max-w-sm leading-relaxed mb-8">
+                  با اشتراک ویژه تم‌مارکت، محدودیت‌ها را کنار بگذارید و به آرشیو کامل محصولات دسترسی داشته باشید.
                 </p>
-                <div className="flex items-center gap-4">
-                  <button className="flex items-center justify-center rounded-lg h-11 px-6 bg-primary text-white text-sm font-bold shadow-lg shadow-blue-900/50 hover:bg-blue-600 transition-all">
-                    مشاهده پکیج
-                  </button>
-                  <span className="text-sm font-medium text-white">۱۹۹ هزار تومان / سالانه</span>
+              </div>
+
+              <div className="relative z-10 flex items-center gap-6 mt-12">
+                <button className="h-14 rounded-2xl bg-primary px-10 text-sm font-black text-white shadow-xl shadow-primary/30 hover:shadow-primary/50 transition-all hover:scale-105 active:scale-95">
+                  شروع کنید
+                </button>
+                <div className="flex -space-x-4 space-x-reverse">
+                  {[1,2,3,4].map(i => (
+                    <div key={i} className="h-10 w-10 rounded-full border-2 border-background-dark bg-slate-800 flex items-center justify-center overflow-hidden">
+                      <img src={`https://i.pravatar.cc/40?img=${i+10}`} alt="user" />
+                    </div>
+                  ))}
+                  <div className="h-10 w-10 rounded-full border-2 border-background-dark bg-primary flex items-center justify-center text-[10px] font-bold text-white">+۵ک</div>
                 </div>
               </div>
             </div>
           )}
 
-          {filteredCategories.length > 0 ? (
-            filteredCategories.map((cat) => {
-              const delay = (cardIndex++) * 0.1;
-              
-              if (cat.id === 'ecommerce' && cat.size === 'wide' && (selectedTag === 'همه' || selectedTag === 'ووکامرس' || selectedTag === 'شاپیفای')) {
-                return (
-                  <div 
-                    key={`${cat.id}-${selectedTag}`} 
-                    className="bento-card animate-fade-in-up col-span-1 md:col-span-2 row-span-1 rounded-2xl bg-card-dark border border-[#232948] p-6 relative overflow-hidden group"
-                    style={{ animationDelay: `${delay}s` }}
-                  >
-                    <div className="absolute left-0 top-0 w-64 h-full bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 h-full relative z-10 text-right">
-                      <div className="flex flex-col gap-3">
-                        <div className={`size-12 rounded-lg bg-[#232948] flex items-center justify-center text-white mb-1 group-hover:bg-primary transition-colors duration-300`}>
-                          <span className="material-symbols-outlined text-[24px]">{cat.icon}</span>
-                        </div>
-                        <div>
-                          <h3 className="text-xl font-bold text-white">{cat.title}</h3>
-                          <p className="text-text-secondary text-sm mt-1">{cat.description}</p>
-                        </div>
-                        <div className="flex gap-2 flex-wrap mt-2">
-                          {cat.tags?.map(t => (
-                            <span key={t} className={`px-2 py-1 rounded bg-[#111422] border border-[#232948] text-[10px] ${selectedTag === t ? 'text-primary border-primary' : 'text-text-secondary'}`}>
-                              {t}
-                            </span>
-                          ))}
-                        </div>
+          {/* Featured Dynamic Card */}
+          {filteredCategories.map((cat) => {
+            const delay = (cardIndex++) * 0.1;
+            
+            if (cat.size === 'wide') {
+              return (
+                <div 
+                  key={cat.id} 
+                  className="bento-card group col-span-1 md:col-span-2 row-span-1 rounded-[2.5rem] p-8 flex flex-col justify-between animate-fade-in-up"
+                  style={{ animationDelay: `${delay}s` }}
+                >
+                  <div className="flex items-start justify-between relative z-10">
+                    <div className="flex flex-col gap-2">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-all duration-500">
+                        <span className="material-symbols-outlined text-2xl">{cat.icon}</span>
                       </div>
-                      <div className="flex-shrink-0 mt-4 md:mt-0">
-                        <div 
-                          className="w-32 h-24 rounded-lg bg-cover bg-center shadow-lg transform -rotate-3 group-hover:rotate-0 transition-transform duration-300 border border-[#232948]" 
-                          style={{ backgroundImage: `url('https://lh3.googleusercontent.com/aida-public/AB6AXuC0R6R75WZT057JnvwTb4a7FCSNIlYdeJFy-L_MZrG-xQix6kFBgNKORarjsR4DZFKupVeGHwjOtl0Ik9vPiH920jiiubuMXZaGpxwefMByu8hNAVWE1t510rN6N8RMCX0j2-HvP-y38NgsfIoHqKB_Qv4D4vL3LScBzg3Jvsyldf4mwMPhK-Rdrf2PhHFXWMpzBi5DoZwMfmrWoBlslwgpxarZna9KRgL3pbA3Y7WeFJzkBo21Eyvtx5JUgQ9hRvTGAvfX4PUDbis')` }}
-                        />
-                      </div>
+                      <h3 className="text-2xl font-black text-white mt-2">{cat.title}</h3>
                     </div>
-                    <a aria-label={`Browse ${cat.title}`} className="absolute inset-0 z-20" href={cat.link}></a>
+                    {cat.badge && (
+                      <span className="bg-primary/20 text-primary text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">
+                        {cat.badge}
+                      </span>
+                    )}
                   </div>
-                );
-              }
 
-              if (cat.id !== 'ecommerce') {
-                return (
-                  <div 
-                    key={`${cat.id}-${selectedTag}`} 
-                    className="bento-card animate-fade-in-up col-span-1 row-span-1 rounded-2xl bg-card-dark border border-[#232948] p-6 flex flex-col justify-between group relative overflow-hidden text-right"
-                    style={{ animationDelay: `${delay}s` }}
-                  >
-                    <div className={`absolute -left-4 -top-4 w-24 h-24 bg-${cat.color}/10 rounded-full blur-2xl group-hover:bg-${cat.color}/20 transition-all`}></div>
-                    <div className="flex justify-between items-start">
-                      <div className={`size-10 rounded-lg bg-[#232948] flex items-center justify-center text-white group-hover:bg-${cat.color === 'primary' ? 'primary' : cat.color} transition-colors duration-300`}>
-                        <span className="material-symbols-outlined text-[20px]">{cat.icon}</span>
-                      </div>
-                      <span className="material-symbols-outlined text-gray-600 group-hover:text-white transition-colors rotate-180">arrow_outward</span>
+                  <div className="flex items-end justify-between relative z-10 mt-8">
+                    <p className="text-slate-400 text-sm max-w-[240px] leading-relaxed">
+                      {cat.description}
+                    </p>
+                    <div className="text-left">
+                      <div className="text-[10px] font-bold text-slate-500 uppercase">شروع قیمت</div>
+                      <div className="text-xl font-black text-white">{cat.price}</div>
                     </div>
-                    <div className="mt-8">
-                      <h3 className="text-lg font-bold text-white group-hover:-translate-x-1 transition-transform">{cat.title}</h3>
-                      <p className="text-text-secondary text-xs mt-1 mb-3">{cat.description}</p>
-                      <div className="flex gap-1 flex-wrap">
-                        {cat.tags?.slice(0, 2).map(t => (
-                          <span key={t} className={`px-1.5 py-0.5 rounded text-[10px] bg-[#111422] border border-[#232948] ${selectedTag === t ? 'text-primary border-primary' : 'text-gray-500'}`}>
-                            {t}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <a aria-label={`Browse ${cat.title}`} className="absolute inset-0 z-20" href={cat.link}></a>
                   </div>
-                );
-              }
-              return null;
-            })
-          ) : (
-            <div className="col-span-full py-20 text-center animate-fade-in flex flex-col items-center justify-center bg-card-dark/30 rounded-3xl border border-dashed border-[#232948]">
-              <span className="material-symbols-outlined text-gray-600 text-[64px] mb-4">search_off</span>
-              <p className="text-text-secondary">متاسفیم، قالبی با برچسب "{selectedTag}" پیدا نشد.</p>
-              <button onClick={() => setSelectedTag('همه')} className="mt-4 text-primary font-bold hover:underline">مشاهده همه دسته‌بندی‌ها</button>
-            </div>
-          )}
+                  <a href={cat.link} className="absolute inset-0 z-20"></a>
+                </div>
+              );
+            }
 
+            // Small Squared Bento Cards
+            return (
+              <div 
+                key={cat.id} 
+                className="bento-card group col-span-1 row-span-1 rounded-[2.5rem] p-8 flex flex-col justify-between animate-fade-in-up"
+                style={{ animationDelay: `${delay}s` }}
+              >
+                <div className="relative z-10">
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 text-slate-300 group-hover:scale-110 group-hover:text-white transition-all duration-500`}>
+                    <span className="material-symbols-outlined text-2xl">{cat.icon}</span>
+                  </div>
+                </div>
+
+                <div className="relative z-10 mt-12">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-black text-white">{cat.title}</h3>
+                    <span className="text-[10px] font-bold text-primary">{cat.count}</span>
+                  </div>
+                  <p className="text-slate-500 text-xs leading-relaxed line-clamp-2">
+                    {cat.description}
+                  </p>
+                </div>
+                
+                <div className="mt-4 flex gap-2">
+                  {cat.tags?.slice(0, 1).map(tag => (
+                    <span key={tag} className="text-[9px] font-bold text-slate-600 bg-white/5 px-2 py-0.5 rounded-md">#{tag}</span>
+                  ))}
+                </div>
+                <a href={cat.link} className="absolute inset-0 z-20"></a>
+              </div>
+            );
+          })}
+
+          {/* Special Support Bento Card */}
           <div 
-            key={`custom-${selectedTag}`}
-            className="bento-card animate-fade-in-up col-span-1 md:col-span-2 row-span-1 rounded-2xl bg-gradient-to-bl from-[#191e33] to-[#12141f] border border-[#232948] p-6 relative overflow-hidden flex items-center justify-between group text-right"
+            className="bento-card group col-span-1 md:col-span-2 row-span-1 rounded-[2.5rem] p-8 bg-gradient-to-bl from-accent-purple/10 to-transparent flex items-center justify-between animate-fade-in-up"
             style={{ animationDelay: `${(cardIndex++) * 0.1}s` }}
           >
-            <div className="flex items-center gap-6 z-10">
-              <div className="size-14 rounded-full bg-[#232948] flex flex-shrink-0 items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                <span className="material-symbols-outlined text-[32px]">support_agent</span>
+            <div className="flex items-center gap-6 relative z-10">
+              <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-accent-purple/20 text-accent-purple group-hover:rotate-12 transition-all">
+                <span className="material-symbols-outlined text-4xl">support_agent</span>
               </div>
               <div>
-                <h3 className="text-xl font-bold text-white">نیاز به شخصی‌سازی دارید؟</h3>
-                <p className="text-text-secondary text-sm mt-1 max-w-sm">توسعه‌دهندگان خبره ما می‌توانند به شما در شخصی‌سازی قالب‌ها کمک کنند.</p>
+                <h3 className="text-2xl font-black text-white">پشتیبانی VIP</h3>
+                <p className="text-slate-400 text-sm mt-1">مشاوره اختصاصی برای توسعه پروژه‌های شما.</p>
               </div>
             </div>
-            <div className="z-10 hidden sm:block">
-              <button className="px-5 py-2 rounded-lg bg-[#232948] hover:bg-white hover:text-black text-white text-sm font-medium transition-colors border border-[#343b5c] hover:border-white">
-                دریافت پشتیبانی
-              </button>
-            </div>
-            <div className="absolute left-0 bottom-0 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
-              <svg fill="none" height="200" viewBox="0 0 200 200" width="200" xmlns="http://www.w3.org/2000/svg">
-                <path d="M100 0C155.228 0 200 44.7715 200 100C200 155.228 155.228 200 100 200C44.7715 200 0 155.228 0 100C0 44.7715 44.7715 0 100 0ZM100 17.3913C54.3787 17.3913 17.3913 54.3787 17.3913 100C17.3913 145.621 54.3787 182.609 100 182.609C145.621 182.609 182.609 145.621 182.609 100C182.609 54.3787 145.621 17.3913 100 17.3913Z" fill="currentColor"></path>
-              </svg>
-            </div>
+            <button className="hidden sm:block h-12 rounded-2xl glass-tag px-6 text-xs font-black text-white hover:bg-white hover:text-black transition-all">
+              درخواست مشاوره
+            </button>
           </div>
 
         </div>
+
+        {filteredCategories.length === 0 && (
+          <div className="mt-20 flex flex-col items-center justify-center py-20 animate-fade-in">
+             <div className="text-slate-800 mb-6">
+                <span className="material-symbols-outlined text-8xl">search_off</span>
+             </div>
+             <p className="text-xl font-bold text-slate-400">قالبی در این دسته‌بندی پیدا نشد</p>
+             <button onClick={() => setSelectedTag('همه')} className="mt-4 text-primary font-bold hover:underline">بازگشت به همه دسته‌ها</button>
+          </div>
+        )}
       </main>
 
-      <footer className="mt-auto border-t border-[#232948] py-8 text-center bg-[#111422]">
-        <p className="text-text-secondary text-sm">© ۲۰۲۴ اکوسیستم‌های تم‌مارکت. تمامی حقوق محفوظ است.</p>
+      <footer className="mt-32 border-t border-white/5 pt-12 text-center">
+        <div className="mx-auto max-w-[1400px] px-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12 text-right">
+             <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-primary text-sm">rocket_launch</span>
+                  </div>
+                  <h5 className="font-black text-white">تم‌مارکت</h5>
+                </div>
+                <p className="text-slate-500 text-sm max-w-xs">مرجع تخصصی تهیه و بومی‌سازی قالب‌های وردپرس با بالاترین استانداردهای جهانی.</p>
+             </div>
+             <div className="flex gap-12">
+                <div className="flex flex-col gap-4">
+                   <span className="text-xs font-black text-white uppercase tracking-widest">محصولات</span>
+                   <a href="#" className="text-xs text-slate-500 hover:text-white">جدیدترین‌ها</a>
+                   <a href="#" className="text-xs text-slate-500 hover:text-white">پر‌فروش‌ها</a>
+                </div>
+                <div className="flex flex-col gap-4">
+                   <span className="text-xs font-black text-white uppercase tracking-widest">شرکت</span>
+                   <a href="#" className="text-xs text-slate-500 hover:text-white">درباره ما</a>
+                   <a href="#" className="text-xs text-slate-500 hover:text-white">تماس</a>
+                </div>
+             </div>
+          </div>
+          <p className="text-slate-600 text-[11px] font-bold pb-12">
+            تمامی حقوق مادی و معنوی نزد تم‌مارکت محفوظ است. ۲۰۲۴-۲۰۲۵
+          </p>
+        </div>
       </footer>
     </div>
   );
