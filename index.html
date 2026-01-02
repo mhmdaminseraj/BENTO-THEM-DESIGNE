@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>تم‌مارکت - مگامنو ۲۰۲۵</title>
+    <title>تم‌مارکت - مگامنو حرفه‌ای ۲۰۲۵</title>
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&family=Manrope:wght@400;700;800&display=swap" rel="stylesheet"/>
@@ -41,7 +41,6 @@
         ::-webkit-scrollbar-track { background: #05060F; }
         ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 10px; }
         
-        /* افزایش غلظت رنگ پس‌زمینه برای وضوح بیشتر مگامنو */
         .bento-card {
             background: rgba(13, 15, 26, 0.8);
             backdrop-filter: blur(20px);
@@ -49,19 +48,37 @@
             box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
         }
 
+        /* پنل مگامنو با غلظت بسیار بالا برای رفع مشکل ناخوانایی */
         .mega-menu-panel {
-            background: rgba(10, 12, 22, 0.98); /* شفافیت بسیار کمتر برای وضوح بالاتر */
-            backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.15); /* حاشیه مشخص‌تر */
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            background: #0A0C16; /* رنگ کاملا تیره و غیرشفاف */
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.9), 0 0 20px rgba(59, 130, 246, 0.05);
             transform-origin: top;
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
         }
 
         .nav-item:hover .mega-menu-panel {
             opacity: 1 !important;
             visibility: visible !important;
             transform: translateY(0) scale(1) !important;
+            pointer-events: auto;
+        }
+
+        /* نشانگر زیر منوها */
+        .nav-link-indicator {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 20px;
+            height: 2px;
+            background: #3B82F6;
+            border-radius: 2px;
+            transition: transform 0.3s ease;
+        }
+        .nav-item:hover .nav-link-indicator {
+            transform: translateX(-50%) scaleX(1);
         }
         
         @keyframes fadeInUp {
@@ -73,15 +90,22 @@
             opacity: 0;
         }
 
-        .glass-tag {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(4px);
-        }
-
         .material-symbols-outlined {
             display: inline-block;
             direction: ltr;
+            vertical-align: middle;
+        }
+
+        /* استایل خاص برای فیلد جستجو مشابه تصویر کاربر */
+        .search-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+        .search-container:focus-within {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
         }
     </style>
 <script type="importmap">
