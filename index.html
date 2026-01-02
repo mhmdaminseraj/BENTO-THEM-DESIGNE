@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>تم‌مارکت - مگامنو حرفه‌ای ۲۰۲۵</title>
+    <title>تم‌مارکت - اکوسیستم مدرن طراحی ۲۰۲۵</title>
     <link href="https://fonts.googleapis.com" rel="preconnect"/>
     <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&family=Manrope:wght@400;700;800&display=swap" rel="stylesheet"/>
@@ -15,6 +15,9 @@
             darkMode: "class",
             theme: {
                 extend: {
+                    screens: {
+                        'xs': '480px',
+                    },
                     colors: {
                         "primary": "#3B82F6",
                         "accent-purple": "#A855F7",
@@ -25,7 +28,7 @@
                     fontFamily: {
                         "display": ["Vazirmatn", "Manrope", "Tahoma", "sans-serif"]
                     },
-                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "2xl": "2rem", "full": "9999px"},
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "2xl": "2rem", "3xl": "2.5rem", "full": "9999px"},
                 },
             },
         }
@@ -36,25 +39,33 @@
             background-image: 
                 radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
                 radial-gradient(at 50% 0%, hsla(225,39%,30%,0.15) 0, transparent 50%);
+            -webkit-font-smoothing: antialiased;
         }
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #05060F; }
         ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 10px; }
         
         .bento-card {
-            background: rgba(13, 15, 26, 0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+            background: rgba(13, 15, 26, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 
+                inset 0 1px 1px rgba(255, 255, 255, 0.05),
+                0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .bento-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.7);
         }
 
-        /* پنل مگامنو با غلظت بسیار بالا برای رفع مشکل ناخوانایی */
         .mega-menu-panel {
-            background: #0A0C16; /* رنگ کاملا تیره و غیرشفاف */
+            background: #0A0C16;
             border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.9), 0 0 20px rgba(59, 130, 246, 0.05);
+            box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.9);
             transform-origin: top;
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             pointer-events: none;
         }
 
@@ -65,13 +76,12 @@
             pointer-events: auto;
         }
 
-        /* نشانگر زیر منوها */
         .nav-link-indicator {
             position: absolute;
-            bottom: 0;
+            bottom: 12px;
             left: 50%;
             transform: translateX(-50%) scaleX(0);
-            width: 20px;
+            width: 16px;
             height: 2px;
             background: #3B82F6;
             border-radius: 2px;
@@ -82,12 +92,18 @@
         }
         
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); filter: blur(10px); }
+            from { opacity: 0; transform: translateY(24px); filter: blur(8px); }
             to { opacity: 1; transform: translateY(0); filter: blur(0); }
         }
         .animate-fade-in-up {
-            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             opacity: 0;
+        }
+
+        .glass-tag {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(8px);
         }
 
         .material-symbols-outlined {
@@ -96,10 +112,9 @@
             vertical-align: middle;
         }
 
-        /* استایل خاص برای فیلد جستجو مشابه تصویر کاربر */
         .search-container {
             background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             transition: all 0.3s ease;
         }
         .search-container:focus-within {
@@ -119,7 +134,7 @@
 }
 </script>
 </head>
-<body class="font-display text-slate-200 overflow-x-hidden min-h-screen selection:bg-primary selection:text-white">
+<body class="font-display text-slate-200 overflow-x-hidden min-h-screen">
     <div id="root"></div>
 </body>
 </html>
